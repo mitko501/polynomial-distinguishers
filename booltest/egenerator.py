@@ -18,7 +18,6 @@ FUNCTION_SHA3 = 2
 FUNCTION_BLOCK = 3
 FUNCTION_HASH = 4
 
-
 STREAM_TYPES = {
     FUNCTION_ESTREAM: 'estream',
     FUNCTION_SHA3: 'sha3',
@@ -65,6 +64,7 @@ class Stream(object):
     """
     Base stream object
     """
+
     def __init__(self):
         pass
 
@@ -107,7 +107,6 @@ ESTREAM = {
     'WG': None,
     'Zk-Crypt': None
 }
-
 
 # SHA3
 SHA3 = {
@@ -156,7 +155,6 @@ SHA3 = {
     'Tangle2': FunctionParams(rounds=80),
 }
 
-
 # Hash
 HASH = {
     'Gost': FunctionParams(rounds=32, block_size=32, out_size=32),
@@ -167,7 +165,6 @@ HASH = {
     'Tiger': FunctionParams(rounds=24, block_size=24, in_size=64, out_size=24),
     'Whirlpool': FunctionParams(rounds=10, block_size=64, in_size=64, out_size=64),
 }
-
 
 # Block ciphers
 BLOCK = {
@@ -189,8 +186,26 @@ BLOCK = {
     'TRIPLE-DES': FunctionParams(8, 24, rounds=16),
     'TWOFISH': FunctionParams(16, 16, rounds=16),
     'GOST_BLOCK': FunctionParams(rounds=32, block_size=8, key_size=32, fname='GOST'),
+    'CHASKEY': FunctionParams(rounds=16, block_size=16, key_size=16),
+    'FANTOMAS': FunctionParams(rounds=12, block_size=16, key_size=16),
+    'HIGHT': FunctionParams(rounds=32, block_size=8, key_size=16),
+    'LBLOCK': FunctionParams(rounds=32, block_size=8, key_size=10),
+    'LEA': FunctionParams(rounds=24, block_size=16, key_size=16),
+    'LED': FunctionParams(rounds=48, block_size=8, key_size=10),
+    'PICCOLO': FunctionParams(rounds=25, block_size=8, key_size=10),
+    'PRIDE': FunctionParams(rounds=20, block_size=8, key_size=16),
+    'PRINCE': FunctionParams(rounds=12, block_size=8, key_size=16),
+    'RC5-20': FunctionParams(rounds=20, block_size=8, key_size=16),
+    'RECTANGLE-K80': FunctionParams(rounds=25, block_size=8, key_size=10),
+    'RECTANGLE-K128': FunctionParams(rounds=25, block_size=8, key_size=16),
+    'ROAD-RUNNER-K80': FunctionParams(rounds=10, block_size=8, key_size=10),
+    'ROAD-RUNNER-K128': FunctionParams(rounds=12, block_size=8, key_size=16),
+    'ROBIN': FunctionParams(rounds=16, block_size=16, key_size=16),
+    'ROBIN-STAR': FunctionParams(rounds=16, block_size=16, key_size=16),
+    'SPARX-B64': FunctionParams(rounds=8, block_size=8, key_size=16),
+    'SPARX-B128': FunctionParams(rounds=8, block_size=16, key_size=16),
+    'TWINE': FunctionParams(rounds=35, block_size=8, key_size=10)
 }
-
 
 # Interesting rounds to test
 ROUNDS = {
@@ -254,11 +269,28 @@ ROUNDS = {
     'Trivium': [1, 2, 3, 4],
     'TWOFISH': [1, 2, 3, 4, 5],
     'Whirlpool': [1, 2, 3],
+    'CHASKEY': [2, 3, 4, 5],
+    'FANTOMAS': [2, 3, 4],
+    'HIGHT': [8, 9, 10, 11],
+    'LBLOCK': [7, 8, 9, 10, 11],
+    'LEA': [4, 8, 9],
+    'LED': [1, 4, 8],
+    'PICCOLO': [3, 4, 5, 6],
+    'PRIDE': [5, 6, 7, 8],
+    'PRINCE': [3, 4, 5],
+    'RC5-20': [4, 5, 6],
+    'RECTANGLE-K80': [7, 8, 9, 10],
+    'RECTANGLE-K128': [6, 7, 8, 9],
+    'ROAD-RUNNER-K80': [2, 3, 4],
+    'ROAD-RUNNER-K128': [2, 3, 4],
+    'ROBIN': [2, 3, 4],
+    'ROBIN-STAR': [2, 3, 4],
+    'SPARX-B64': [1, 2, 3],
+    'SPARX-B128': [1, 2, 3, 4],
+    'TWINE': [7, 8, 9]
 }
 
-
 ALL_FUNCTIONS = common.merge_dicts([SHA3, ESTREAM, HASH, BLOCK])
-
 
 NARROW_SELECTION = {
     'AES', 'BLOWFISH', 'SINGLE-DES', 'TRIPLE-DES', 'SIMON', 'SPECK', 'TEA',
@@ -269,21 +301,17 @@ NARROW_SELECTION = {
     'ARIA', 'CAST', 'CAMELLIA', 'IDEA', 'SEED',
 }
 
-
 NARROW_SELECTION_EXTPAPER = {
     'AES', 'BLOWFISH', 'SINGLE-DES', 'TRIPLE-DES', 'TEA',
     'Grostl', 'JH', 'Keccak', 'MD6', 'MD5', 'SHA1', 'SHA256',
 }
 
-
 BENCHMARK_SELECTION = {
     'AES', 'BLOWFISH', 'TWOFISH', 'SINGLE-DES', 'TRIPLE-DES'
 }
 
-
 NARROW_SELECTION_LOW = {x.lower() for x in NARROW_SELECTION}
 NARROW_SELECTION_EXTPAPER_LOW = {x.lower() for x in NARROW_SELECTION_EXTPAPER}
-
 
 # lower(function_name) -> function_name
 FUNCTION_CASEMAP = {x.lower(): x for x in list(ALL_FUNCTIONS.keys())}
@@ -430,7 +458,8 @@ def is_narrow(fname, narrow_type=0):
 
 
 class FunctionGenConfig(object):
-    def __init__(self, function_name, stream_type=None, tvsize=None, rounds=None, tvcount=None, data=None, params=None, **kwargs):
+    def __init__(self, function_name, stream_type=None, tvsize=None, rounds=None, tvcount=None, data=None, params=None,
+                 **kwargs):
         self.function_name = None
         self.stream_type = None
         self.tvsize = tvsize
@@ -439,8 +468,10 @@ class FunctionGenConfig(object):
 
         if function_name is not None:
             self.function_name = normalize_function_name(function_name)
-            self.stream_type = function_to_stream_type(function_name=function_name) if stream_type is None else stream_type
-            self.tvsize = get_tv_size(stream_type=self.stream_type, function_name=function_name) if tvsize is None else tvsize
+            self.stream_type = function_to_stream_type(
+                function_name=function_name) if stream_type is None else stream_type
+            self.tvsize = get_tv_size(stream_type=self.stream_type,
+                                      function_name=function_name) if tvsize is None else tvsize
             if self.rounds is None:
                 raise ValueError('Rounds is not defined')
 
@@ -453,7 +484,7 @@ class FunctionGenConfig(object):
 
     def to_json(self):
         return dict(self.__dict__)
-    
+
     def __repr__(self):
         return 'FunctionGenConfig(fnc=%r, ftype=%r, tvsize=%r, rounds=%r, num=%r)' \
                % (self.function_name, self.stream_type, self.tvsize, self.rounds, self.num)
@@ -479,7 +510,7 @@ def is_randomized(stream):
     if stype in [StreamCodes.ZERO, StreamCodes.COUNTER]:
         return False
 
-    elif stype in [StreamCodes.RANDOM, StreamCodes.SAC, StreamCodes.SAC_STEP, StreamCodes.RPCS]:
+    elif stype in [StreamCodes.RANDOM, StreamCodes.SAC, StreamCodes.SAC_STEP, StreamCodes.RPCS, "tuple_stream"]:
         return True
 
     elif stype in [StreamCodes.XOR]:
@@ -517,7 +548,7 @@ def get_rpcs_stream(**kwargs):
     return {'type': StreamCodes.RPCS, 'scode': 'rpcs'}
 
 
-def get_hw_stream(hw=3, increase_hw=False, randomize_start=False, randomize_overflow=False, **kwargs):
+def get_hw_stream(hw=1, increase_hw=False, randomize_start=False, randomize_overflow=False, **kwargs):
     ob = collections.OrderedDict()
     ob['type'] = 'hw_counter'
     ob['hw'] = hw
@@ -570,6 +601,43 @@ def pick_iv_size_fcfg(fun_cfg, default=None):
     if fun_cfg is None:
         return default
     return pick_iv_size(fun_cfg.params, default)
+
+
+def get_rpc_config(func_cfg, src_key=None, src_iv=None, **kwargs):
+    fname = func_cfg.params.fname if func_cfg and func_cfg.params and func_cfg.params.fname else func_cfg.function_name
+
+    src_iv = src_iv if src_iv else get_zero_stream()
+    src_key = src_key if src_key else get_random_stream()
+
+    fnc_config = {
+        "type": STREAM_TYPES[func_cfg.stream_type],
+        "init_frequency": "only_once",
+        "algorithm": fname,
+        "round": func_cfg.rounds,
+        "block_size": func_cfg.tvsize,
+        "plaintext": {
+            "type": "pipe_in_stream",
+            "id": "ptx_stream",
+            "source": "pcg32_stream"
+        },
+        "key_size": BLOCK[func_cfg.function_name].key_size,
+        "key": src_key,
+        "iv_size": 16,
+        "iv": src_iv
+    }
+
+    config = {
+        "type": "tuple_stream",
+        "scode": "tp%s-a%s-r%s-tv%s-in%s-k%s-ri%s" % ("rpc", fname, func_cfg.rounds, func_cfg.tvsize,
+                                                          "rnd", "rnd", "o"),
+        "sources": [fnc_config, {
+            "type": "pipe_out_stream",
+            "id": "ptx_stream",
+            "output_size": func_cfg.tvsize
+        }]
+    }
+
+    return config
 
 
 def get_function_config(func_cfg,
@@ -638,7 +706,8 @@ def get_function_config(func_cfg,
 
     elif func_cfg.stream_type == FUNCTION_ESTREAM:
         stream_obj['init_frequency'] = str(init_frequency)
-        stream_obj['key_size'] = ESTREAM[func_cfg.function_name].key_size if ESTREAM[func_cfg.function_name].key_size else 16
+        stream_obj['key_size'] = ESTREAM[func_cfg.function_name].key_size if ESTREAM[
+            func_cfg.function_name].key_size else 16
         stream_obj['plaintext_type'] = src_input
         stream_obj['key_type'] = src_key
         stream_obj['iv_type'] = src_iv
@@ -912,7 +981,7 @@ def generate_config(args):
     fnc = normalize_function_name(fnc)
     params = ALL_FUNCTIONS[fnc] if fnc in ALL_FUNCTIONS else None
 
-    fgc = FunctionGenConfig(fnc, rounds=args.round, data=args.size*1024*1024, params=params)
+    fgc = FunctionGenConfig(fnc, rounds=args.round, data=args.size * 1024 * 1024, params=params)
 
     input = args.input
     iv = args.iv
@@ -927,12 +996,13 @@ def generate_config(args):
         iv_s = determine_stream(iv)
         key_s = determine_stream(key)
         input_s = determine_stream(input)
-        fun_cfg = get_function_config(fgc, src_input=input_s, src_key=key_s, iv=iv_s, init_frequency='every_vector' if reinit else None)
+        fun_cfg = get_function_config(fgc, src_input=input_s, src_key=key_s, iv=iv_s,
+                                      init_frequency='every_vector' if reinit else None)
 
     seed = args.seed
     if args.seed_random:
         rand = random.Random()
-        seed = '%016x' % rand.getrandbits(8*8)
+        seed = '%016x' % rand.getrandbits(8 * 8)
 
     elif args.seed_code is not None:
         seed = common.generate_seed(args.seed_code)
@@ -997,5 +1067,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

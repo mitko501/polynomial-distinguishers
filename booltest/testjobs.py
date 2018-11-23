@@ -304,93 +304,106 @@ class Testjobs(Booltest):
         :return:
         """
         fun_configs = []
+        fun_configs.append(egenerator.get_function_config(fgc,
+                                                src_input=egenerator.get_counter_stream(),
+                                                src_key=egenerator.get_random_stream()))
+        fun_configs.append(egenerator.get_function_config(fgc,
+                                                          src_input=egenerator.get_hw_stream(),
+                                                          src_key=egenerator.get_random_stream()))
+        fun_configs.append(egenerator.get_function_config(fgc,
+                                                          src_input=egenerator.get_sac_stream(),
+                                                          src_key=egenerator.get_random_stream()))
+        fun_configs.append(egenerator.get_rpc_config(fgc, src_key=egenerator.get_random_stream()))
 
-        # Random key, enc zeros - stream ciphers
-        if is_stream:
-            fun_configs += [
-                egenerator.get_function_config(fgc,
-                                               src_input=egenerator.get_zero_stream(),
-                                               src_key=egenerator.get_random_stream())
-            ]
 
-        # zero input, reinit keys, different types (col style)
-        if not self.args.no_reinit and (is_stream or is_block):
-            fun_configs += [
-                egenerator.zero_inp_reinit_key(fgc, egenerator.get_random_stream()),
-            ]
 
-            if not is_3des:
-                fun_configs += [
-                    egenerator.zero_inp_reinit_key(fgc, egenerator.get_hw_stream(hw_key_val)),
-                    egenerator.zero_inp_reinit_key(fgc, egenerator.get_counter_stream())
-                ]
 
-            if self.args.ref_only:
-                fun_configs += [
-                    egenerator.zero_inp_reinit_key(fgc, egenerator.get_hw_stream(6)),
-                ]
+        # # Random key, enc zeros - stream ciphers
+        # if is_stream:
+        #     fun_configs += [
+        #         egenerator.get_function_config(fgc,
+        #                                        src_input=egenerator.get_zero_stream(),
+        #                                        src_key=egenerator.get_random_stream())
+        #     ]
 
-            if not self.args.no_sac:
-                fun_configs += [
-                    egenerator.zero_inp_reinit_key(fgc, egenerator.get_sac_step_stream()),
-                ]
-
-        # 1. (rpsc, rpsc-xor, sac, sac-xor, hw, counter) input, random key. 2 different random keys
-        target_iterations = 1 if is_sha3 else self.args.rand_runs
-        if self.args.ref_only or self.args.all_zscores:
-            target_iterations = 1
-
-        for i in range(target_iterations):
-            if is_stream:
-                continue
-
-            fun_key = egenerator.get_zero_stream() if i == 0 and not self.args.ref_only else \
-                egenerator.get_random_stream()
-
-            if not self.args.no_counters:
-                fun_configs += [
-                    egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(hw_val), src_key=fun_key),
-                    egenerator.get_function_config(fgc, src_input=egenerator.get_counter_stream(), src_key=fun_key),
-                ]
-
-            if self.args.ref_only:
-                fun_configs += [
-                    egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(6), src_key=fun_key)
-                ]
-
-            if not self.args.counters_only and not self.args.no_rpcs:
-                fun_configs += [
-                    egenerator.rpcs_inp(fgc, fun_key),
-                ]
-
-            if not self.args.counters_only and not self.args.no_sac:
-                fun_configs += [
-                    egenerator.sac_inp(fgc, fun_key),
-                ]
-
-            if not self.args.counters_only and not self.args.no_xor_strategy:
-                fun_configs += [
-                    egenerator.rpcs_inp_xor(fgc, fun_key),
-                    egenerator.sac_xor_inp(fgc, fun_key),
-                ]
-
-            if self.args.inhwr1:
-                fun_configs += [
-                    egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(1, randomize_overflow=True),
-                                                   src_key=fun_key),
-                ]
-
-            if self.args.inhwr2:
-                fun_configs += [
-                    egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(2, randomize_overflow=True),
-                                                   src_key=fun_key),
-                ]
-
-            if self.args.inhwr4:
-                fun_configs += [
-                    egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(4, randomize_overflow=True),
-                                                   src_key=fun_key),
-                ]
+        # # zero input, reinit keys, different types (col style)
+        # if not self.args.no_reinit and (is_stream or is_block):
+        #     fun_configs += [
+        #         egenerator.zero_inp_reinit_key(fgc, egenerator.get_random_stream()),
+        #     ]
+        #
+        #     if not is_3des:
+        #         fun_configs += [
+        #             egenerator.zero_inp_reinit_key(fgc, egenerator.get_hw_stream(hw_key_val)),
+        #             egenerator.zero_inp_reinit_key(fgc, egenerator.get_counter_stream())
+        #         ]
+        #
+        #     if self.args.ref_only:
+        #         fun_configs += [
+        #             egenerator.zero_inp_reinit_key(fgc, egenerator.get_hw_stream(6)),
+        #         ]
+        #
+        #     if not self.args.no_sac:
+        #         fun_configs += [
+        #             egenerator.zero_inp_reinit_key(fgc, egenerator.get_sac_step_stream()),
+        #         ]
+        #
+        # # 1. (rpsc, rpsc-xor, sac, sac-xor, hw, counter) input, random key. 2 different random keys
+        # target_iterations = 1 if is_sha3 else self.args.rand_runs
+        # if self.args.ref_only or self.args.all_zscores:
+        #     target_iterations = 1
+        #
+        # for i in range(target_iterations):
+        #     if is_stream:
+        #         continue
+        #
+        #     fun_key = egenerator.get_zero_stream() if i == 0 and not self.args.ref_only else \
+        #         egenerator.get_random_stream()
+        #
+        #     if not self.args.no_counters:
+        #         fun_configs += [
+        #             egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(hw_val), src_key=fun_key),
+        #             egenerator.get_function_config(fgc, src_input=egenerator.get_counter_stream(), src_key=fun_key),
+        #         ]
+        #
+        #     if self.args.ref_only:
+        #         fun_configs += [
+        #             egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(6), src_key=fun_key)
+        #         ]
+        #
+        #     if not self.args.counters_only and not self.args.no_rpcs:
+        #         fun_configs += [
+        #             egenerator.rpcs_inp(fgc, fun_key),
+        #         ]
+        #
+        #     if not self.args.counters_only and not self.args.no_sac:
+        #         fun_configs += [
+        #             egenerator.sac_inp(fgc, fun_key),
+        #         ]
+        #
+        #     if not self.args.counters_only and not self.args.no_xor_strategy:
+        #         fun_configs += [
+        #             egenerator.rpcs_inp_xor(fgc, fun_key),
+        #             egenerator.sac_xor_inp(fgc, fun_key),
+        #         ]
+        #
+        #     if self.args.inhwr1:
+        #         fun_configs += [
+        #             egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(1, randomize_overflow=True),
+        #                                            src_key=fun_key),
+        #         ]
+        #
+        #     if self.args.inhwr2:
+        #         fun_configs += [
+        #             egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(2, randomize_overflow=True),
+        #                                            src_key=fun_key),
+        #         ]
+        #
+        #     if self.args.inhwr4:
+        #         fun_configs += [
+        #             egenerator.get_function_config(fgc, src_input=egenerator.get_hw_stream(4, randomize_overflow=True),
+        #                                            src_key=fun_key),
+        #         ]
 
         return fun_configs
 
@@ -873,7 +886,7 @@ class Testjobs(Booltest):
                 if self.args.skip_existing:
                     if self.args.expiring and self.is_job_expired(cfg_file_path):
                         job_expired = True
-                        logger.debug('Job expired: %s' % cfg_file_path)
+                        logger.debug('Job expired: %s'.format(cfg_file_path))
 
                     else:
                         num_skipped_existing += 1
@@ -884,7 +897,7 @@ class Testjobs(Booltest):
 
                 elif not job_expired and not self.args.ignore_existing:
                     logger.warning('Conflicting config: %s' % common.json_dumps(json_config, indent=2))
-                    raise ValueError('File name conflict: %s, test idx: %s' % (cfg_file_path, fidx))
+                    raise ValueError('File name conflict: %s, test idx: %s'.format(cfg_file_path, fidx))
 
             if gen_file_path and (not os.path.exists(gen_file_path) or self.args.overwrite_existing):
                 with open(gen_file_path, 'w+') as fh:
