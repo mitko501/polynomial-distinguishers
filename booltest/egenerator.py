@@ -615,10 +615,13 @@ def get_rpc_config(func_cfg, src_key=None, src_iv=None, **kwargs):
         "algorithm": fname,
         "round": func_cfg.rounds,
         "block_size": func_cfg.tvsize,
+        "output_size": func_cfg.tvsize,
         "plaintext": {
             "type": "pipe_in_stream",
             "id": "ptx_stream",
-            "source": "pcg32_stream"
+            "source": {
+                "type": "pcg32_stream"
+            }
         },
         "key_size": BLOCK[func_cfg.function_name].key_size,
         "key": src_key,
@@ -796,6 +799,7 @@ def get_config_header(func_cfg, seed='1fe40505e131963c', stdout=None, filename=N
     js['stream_type'] = func_cfg.stream_type
     js['tv_size'] = tv_size
     js['tv_count'] = func_cfg.num
+    js["file-name"] = "PREVENT-CryptoStream-to-generate-filename"
     if stdout:
         js['stdout'] = True
     if filename:
