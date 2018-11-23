@@ -85,6 +85,9 @@ class TestRecord(object):
     def ref_category_generic(self):
         return self.method_generic(), self.block, self.deg, self.comb_deg, self.data
 
+    def ref_category_bool_settings_only(self):
+        return "no-method", self.block, self.deg, self.comb_deg, 0
+
 
 def get_method(strategy):
     """
@@ -183,6 +186,9 @@ def get_ref_value(ref_avg, tr):
     ctg_gen = tr.ref_category_generic()
     if ctg_gen in ref_avg:
         return ref_avg[ctg_gen]
+    cfg_bool_settings = tr.ref_category_bool_settings_only()
+    if cfg_bool_settings in ref_avg:
+        return ref_avg[cfg_bool_settings]
     return None
 
 
@@ -343,6 +349,9 @@ def main():
                 if ref_cat != ref_cat_unhw:
                     ref_bins[ref_cat_unhw].append(tr)
 
+                bool_settings_only = tr.ref_category_bool_settings_only()
+                ref_bins[bool_settings_only].append(tr)
+
             test_records.append(tr)
             total_functions.add(tr.function)
             if tr.time_process:
@@ -353,6 +362,12 @@ def main():
             logger.debug(traceback.format_exc())
 
     logger.info('Invalid results: %s' % invalid_results_num)
+    if invalid_results_num != 0:
+        logger.info('Writing invalid file names to filenamesWithInvalidData.txt')
+        with open('filenamesWithInvalidData.txt', 'w') as f:
+            for item in invalid_results:
+                f.write("%s\n" % item)
+
     logger.info('Post processing')
 
     test_records.sort(key=lambda x: (x.function, x.round, x.method, x.data, x.block, x.deg, x.comb_deg))
