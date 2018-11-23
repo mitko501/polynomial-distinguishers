@@ -799,7 +799,7 @@ def get_config_header(func_cfg, seed='1fe40505e131963c', stdout=None, filename=N
     js['stream_type'] = func_cfg.stream_type
     js['tv_size'] = tv_size
     js['tv_count'] = func_cfg.num
-    js["file-name"] = "PREVENT-CryptoStream-to-generate-filename"
+    js["file_name"] = "PREVENT-CryptoStream-to-generate-filename"
     if stdout:
         js['stdout'] = True
     if filename:
