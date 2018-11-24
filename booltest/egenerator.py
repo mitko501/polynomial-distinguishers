@@ -548,7 +548,7 @@ def get_rpcs_stream(**kwargs):
     return {'type': StreamCodes.RPCS, 'scode': 'rpcs'}
 
 
-def get_hw_stream(hw=1, increase_hw=False, randomize_start=False, randomize_overflow=False, **kwargs):
+def get_hw_stream(hw=1, increase_hw=True, randomize_start=False, randomize_overflow=False, **kwargs):
     ob = collections.OrderedDict()
     ob['type'] = 'hw_counter'
     ob['hw'] = hw
