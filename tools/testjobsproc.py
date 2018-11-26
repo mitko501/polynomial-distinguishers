@@ -76,6 +76,9 @@ class TestRecord(object):
     def ref_category(self):
         return self.method, self.block, self.deg, self.comb_deg, self.data
 
+    def ref_category_ignore_size(self):
+        return self.method, self.block, self.deg, self.comb_deg, 0
+
     def bool_category(self):
         return self.block, self.deg, self.comb_deg, self.data
 
@@ -186,13 +189,16 @@ def get_ref_value(ref_avg, tr):
     ctg_gen = tr.ref_category_generic()
     if ctg_gen in ref_avg:
         return ref_avg[ctg_gen]
+    ctg_no_size = tr.ref_category_ignore_size()
+    if ctg_no_size in ref_avg:
+        return ref_avg[ctg_no_size]
     cfg_bool_settings = tr.ref_category_bool_settings_only()
     if cfg_bool_settings in ref_avg:
         return ref_avg[cfg_bool_settings]
     return None
 
 
-def is_over_threshold(ref_avg, tr):
+def is_over_threshold(ref_avg, tr, ref = None):
     """
     Returns true of tr is over the reference threshold
     :param ref_bins:
@@ -200,15 +206,15 @@ def is_over_threshold(ref_avg, tr):
     :type tr: TestRecord
     :return:
     """
-    ref = get_ref_value(ref_avg, tr)
+    ref = ref if ref is not None else get_ref_value(ref_avg, tr)
     if ref is None:
         return False
 
     return abs(tr.zscore) >= ref + 1.0
 
 
-def get_ref_val_def(ref_avg, block, deg, comb_deg, data):
-    cat = (REFERENCE_METHOD, block, deg, comb_deg, data)
+def get_ref_val_def(ref_avg, block, deg, comb_deg, data, reference_method = REFERENCE_METHOD):
+    cat = (reference_method, block, deg, comb_deg, data)
     return ref_avg[cat] if cat in ref_avg else None
 
 
@@ -349,6 +355,9 @@ def main():
                 if ref_cat != ref_cat_unhw:
                     ref_bins[ref_cat_unhw].append(tr)
 
+                ignore_size = tr.ref_category_ignore_size()
+                ref_bins[ignore_size].append(tr)
+
                 bool_settings_only = tr.ref_category_bool_settings_only()
                 ref_bins[bool_settings_only].append(tr)
 
@@ -486,6 +495,18 @@ def main():
                                        + [(fls(x) if x is not None else '-') for x in results_list])
             fh_csv.write(csv_line + '\n')
 
+            for method_name in [REFERENCE_METHOD, 'inrnd-krnd-rio', 'insac-krnd-ri0', 'inhw1i-krnd-ri0']:
+                results_list = []
+                for cur_key in itertools.product(*total_cases):
+                    results_list.append(get_ref_val_def(ref_avg, *cur_key, data=data_mb, reference_method=method_name))
+
+                ctr_line = args.delim.join(['ref-AES', '10', method_name, fls(data_mb)]
+                                           + [(fls(x) if x is not None else '-') for x in results_list])
+                fh_csv.write(ctr_line + '\n')
+
+        if fnc_name == "AES":
+            continue
+
         # Grid list for booltest params
         results_list = []
         for cur_key in itertools.product(*total_cases):
@@ -505,7 +526,7 @@ def main():
             thr = get_ref_value(ref_avg, x)
             if thr is None:
                 return '?'
-            if is_over_threshold(ref_avg, x):
+            if is_over_threshold(ref_avg, x, thr):
                 if retmode == 0:
                     return fls(x.zscore)
                 elif retmode == 1:
